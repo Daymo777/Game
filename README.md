@@ -17,6 +17,7 @@ A big colourful letter appears with an emoji friend ("A is for 🍎 Apple!") and
 | 🐰 Bunny | Random letters | 7 seconds |
 | 🚀 Rocket | Random letters | 4 seconds |
 | 🌈 Words | Spell whole words (CAT, SUN, MOON…) letter by letter | 8 seconds per letter |
+| 💛 My Family | Type the names of the people William loves | 12 seconds per letter |
 
 If the timer runs out, nothing bad happens — the game just points out the key and waits. Ten stars finish a level with a big fanfare.
 
@@ -28,7 +29,21 @@ A stopwatch in the header times each run from first letter to last star. When a 
 - beating (or setting) the fastest time for that level triggers a **NEW PERSONAL BEST!** banner with extra fireworks,
 - each level button on the menu shows its current best time.
 
-Bests are saved on the device (localStorage), so they survive closing the browser.
+Bests are saved on the device (localStorage), so they survive closing the browser. Capital-letter and small-letter modes keep separate bests.
+
+## Sticker book 📖
+
+Every finished level earns one random sticker into William's sticker book — 30 to collect across three sets: **Dinosaurs** 🦖, **Animals** 🦁 and **Mythical Monsters** 🐉. The book lives behind the 📖 button on the level menu; unfound stickers show as dashed "?" circles.
+
+## Small letters mode 🔡
+
+The **Letters: ABC / abc** toggle on the menu switches every level to lowercase — the screen shows "a" while the keys still show "A", teaching the capital-to-small mapping children need for reading. The choice is remembered between visits.
+
+## Grown-ups' corner 🎙️
+
+The 🎙️ button opens a recording screen where parents can record four short cheers in their own voice (correct letter, finished word, finished level, new personal best). Recordings stop automatically after 4 seconds, save on the device, and play instead of the robot voice. Recording needs microphone permission, so it works best with the game opened directly on the family tablet or phone.
+
+To edit the family name list, change the `FAMILY` array near the top of the script in `index.html`.
 
 ## Notes for grown-ups
 
