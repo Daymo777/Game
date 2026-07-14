@@ -110,6 +110,23 @@
     100% { transform: scale(1); }
   }
 
+  #run-clock {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,.75);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: clamp(.9rem, 2.6vw, 1.2rem);
+    font-weight: 800;
+    color: var(--ink);
+    min-height: 34px;
+    font-variant-numeric: tabular-nums;
+    visibility: hidden;
+  }
+  #run-clock.on { visibility: visible; }
+
   #quit-btn {
     border: 3px solid var(--ink);
     background: rgba(255,255,255,.75);
@@ -134,6 +151,22 @@
     justify-content: center;
     gap: 8px;
     min-height: 0;
+  }
+
+  #challenge-card.party { animation: card-party .7s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes card-party {
+    0% { transform: scale(1) rotate(0); }
+    30% { transform: scale(1.12) rotate(-3deg); }
+    60% { transform: scale(1.06) rotate(3deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  .emoji-bit {
+    position: fixed;
+    z-index: 18;
+    font-size: clamp(1.6rem, 5vw, 2.8rem);
+    pointer-events: none;
+    will-change: transform, opacity;
   }
 
   #challenge-card {
@@ -350,8 +383,46 @@
     paint-order: stroke fill;
   }
   .level-btn .hintline { font-size: clamp(.78rem, 2.2vw, .95rem); font-weight: 700; color: var(--ink); }
+  .level-btn .best-tag {
+    font-size: clamp(.78rem, 2.2vw, .95rem);
+    font-weight: 800;
+    color: var(--ink);
+    background: rgba(255,255,255,.85);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .level-btn .best-tag:empty { display: none; }
 
   #trophy-row { font-size: clamp(2.4rem, 9vw, 4.6rem); letter-spacing: .1em; }
+
+  .time-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    padding: 8px 22px;
+    font-size: clamp(1.1rem, 3.4vw, 1.6rem);
+    font-weight: 800;
+    color: var(--ink);
+    box-shadow: 0 4px 0 rgba(58,51,85,.28);
+    font-variant-numeric: tabular-nums;
+  }
+  .time-chip[hidden] { display: none; }
+  #best-banner {
+    margin: 0;
+    font-size: clamp(1.3rem, 4.6vw, 2.2rem);
+    font-weight: 800;
+    color: var(--sun);
+    -webkit-text-stroke: 1.5px var(--ink);
+    paint-order: stroke fill;
+    text-shadow: 0 4px 0 rgba(58,51,85,.25);
+    animation: hint-bounce .7s ease-in-out infinite;
+  }
+  #best-banner[hidden] { display: none; }
   .big-btn {
     border: 4px solid var(--ink);
     border-radius: 999px;
@@ -425,6 +496,7 @@
   <header>
     <h1><span class="a">W</span>illiam's <span class="b">A</span>lphabet <span class="c">G</span>ame</h1>
     <div class="star-meter" id="star-meter" aria-label="Stars earned"></div>
+    <div id="run-clock" aria-label="Run time">⏱️ <span id="run-clock-value">0:00</span></div>
     <button id="quit-btn" type="button">🏠 Levels</button>
   </header>
 
@@ -476,6 +548,9 @@
   <h2 class="headline" id="win-headline">Hooray!</h2>
   <div id="trophy-row">⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐</div>
   <p class="sub" id="win-sub">You found all ten letters!</p>
+  <p id="best-banner" hidden>🏆 NEW PERSONAL BEST! 🏆</p>
+  <span class="time-chip" id="time-chip" hidden>⏱️ Your time: <strong id="time-value"></strong></span>
+  <span class="time-chip" id="best-chip" hidden>🏆 Best time: <strong id="best-value"></strong></span>
   <button class="big-btn" id="again-btn" type="button">Play again! 🎉</button>
   <button class="big-btn alt" id="levels-btn" type="button">Pick a new level 🗺️</button>
 </div>
@@ -570,6 +645,7 @@
     o.stop(audioCtx.currentTime + start + dur + 0.05);
   }
   function playDing()  { tone(660, 0, .18); tone(880, .09, .22); }
+  function playYay()   { [523, 659, 784, 1047, 1319].forEach(function (f, i) { tone(f, i * .07, .25, "triangle", .2); }); }
   function playBoop()  { tone(220, 0, .15, "sine", 0.12); }
   function playTada()  { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, i * .11, .28); }); }
   function playFanfare() {
@@ -599,12 +675,12 @@
   window.addEventListener("resize", sizeCanvas);
   sizeCanvas();
 
-  function burstConfetti(count, big) {
+  function burstConfetti(count, big, ox, oy) {
     var cw = el.canvas.width, ch = el.canvas.height;
     for (var i = 0; i < count; i++) {
       particles.push({
-        x: cw / 2 + (Math.random() - 0.5) * cw * (big ? 0.9 : 0.4),
-        y: big ? ch * 0.25 : ch * 0.35,
+        x: (ox != null ? ox : cw / 2) + (Math.random() - 0.5) * cw * (big ? 0.9 : ox != null ? 0.08 : 0.4),
+        y: oy != null ? oy : big ? ch * 0.25 : ch * 0.35,
         vx: (Math.random() - 0.5) * 10,
         vy: -Math.random() * 11 - 3,
         size: Math.random() * 8 + 5,
@@ -640,6 +716,51 @@
     });
     if (particles.length) requestAnimationFrame(tickConfetti);
     else { confettiRunning = false; ctx.clearRect(0, 0, el.canvas.width, el.canvas.height); }
+  }
+
+  /* ---------------- big celebration ---------------- */
+  var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function emojiShower(emoji, count) {
+    if (reducedMotion || !document.body.animate) return;
+    var card = document.getElementById("challenge-card").getBoundingClientRect();
+    var cx = card.left + card.width / 2;
+    var cy = card.top + card.height / 2;
+    for (var i = 0; i < count; i++) {
+      var bit = document.createElement("span");
+      bit.className = "emoji-bit";
+      bit.textContent = emoji;
+      bit.style.left = cx + "px";
+      bit.style.top = cy + "px";
+      document.body.appendChild(bit);
+      var dx = (Math.random() - 0.5) * window.innerWidth * 0.7;
+      var dy = -(Math.random() * 160 + 80);
+      var fall = window.innerHeight * 0.55 + Math.random() * 120;
+      var spin = (Math.random() - 0.5) * 540;
+      var anim = bit.animate([
+        { transform: "translate(-50%,-50%) scale(.3) rotate(0deg)", opacity: 1 },
+        { transform: "translate(calc(-50% + " + dx * 0.6 + "px), calc(-50% + " + dy + "px) ) scale(1.15) rotate(" + spin * 0.4 + "deg)", opacity: 1, offset: .35 },
+        { transform: "translate(calc(-50% + " + dx + "px), calc(-50% + " + fall + "px)) scale(.9) rotate(" + spin + "deg)", opacity: 0 }
+      ], { duration: 1400 + Math.random() * 500, easing: "cubic-bezier(.2,.7,.5,1)" });
+      anim.onfinish = (function (node) { return function () { node.remove(); }; })(bit);
+    }
+  }
+
+  function celebrate(emoji, keyEl) {
+    var ox = null, oy = null;
+    if (keyEl) {
+      var r = keyEl.getBoundingClientRect();
+      ox = r.left + r.width / 2;
+      oy = r.top + r.height / 2;
+    }
+    burstConfetti(90, false, ox, oy);
+    emojiShower(emoji, 10);
+    showCheer();
+    playYay();
+    var card = document.getElementById("challenge-card");
+    card.classList.remove("party");
+    void card.offsetWidth;
+    card.classList.add("party");
   }
 
   /* ---------------- keyboard build ---------------- */
@@ -829,11 +950,9 @@
       el.caption.textContent = state.currentWord.word + "! " + state.currentWord.emoji + " You spelled it!";
       say(state.currentWord.word.toLowerCase() + "! You spelled it!");
       awardStar();
-      playTada();
-      burstConfetti(70, false);
-      showCheer();
+      celebrate(state.currentWord.emoji, null);
       state.playing = false;
-      setTimeout(nextRound, 1600);
+      setTimeout(nextRound, 1800);
     } else {
       state.target = state.currentWord.word[state.wordIndex];
       renderWordPrompt();
@@ -861,12 +980,10 @@
         advanceWord();
       } else {
         state.playing = false;
-        playDing();
         awardStar();
-        showCheer();
-        burstConfetti(45, false);
+        celebrate(ALPHABET[ch].emoji, keyEl);
         el.caption.textContent = "Yes! That's " + ch + " for " + ALPHABET[ch].word + "! " + ALPHABET[ch].emoji;
-        setTimeout(nextRound, 1300);
+        setTimeout(nextRound, 1600);
       }
     } else {
       playBoop();
@@ -891,6 +1008,64 @@
     handleLetter(ch);
   });
 
+  /* ---------------- run clock & personal bests ---------------- */
+  var clockId = null;
+  var clockValueEl = document.getElementById("run-clock-value");
+  var runClockEl = document.getElementById("run-clock");
+
+  function formatTime(ms) {
+    var total = Math.round(ms / 1000);
+    var m = Math.floor(total / 60);
+    var s = total % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+  function speakTime(ms) {
+    var total = Math.round(ms / 1000);
+    var m = Math.floor(total / 60);
+    var s = total % 60;
+    if (m === 0) return s + " seconds";
+    return m + (m === 1 ? " minute" : " minutes") + " and " + s + " seconds";
+  }
+  function startRunClock() {
+    stopRunClock();
+    state.runStart = performance.now();
+    runClockEl.classList.add("on");
+    clockValueEl.textContent = "0:00";
+    clockId = setInterval(function () {
+      clockValueEl.textContent = formatTime(performance.now() - state.runStart);
+    }, 250);
+  }
+  function stopRunClock() {
+    if (clockId) { clearInterval(clockId); clockId = null; }
+  }
+  function hideRunClock() {
+    stopRunClock();
+    runClockEl.classList.remove("on");
+  }
+
+  function updateLevelBests() {
+    document.querySelectorAll(".level-btn").forEach(function (btn) {
+      var tag = btn.querySelector(".best-tag");
+      if (!tag) {
+        tag = document.createElement("span");
+        tag.className = "best-tag";
+        btn.appendChild(tag);
+      }
+      var best = loadBest(btn.dataset.level);
+      tag.textContent = best ? "🏆 " + formatTime(best) : "";
+    });
+  }
+
+  function loadBest(level) {
+    try {
+      var v = localStorage.getItem("williams-abc-best-" + level);
+      return v ? parseInt(v, 10) : null;
+    } catch (e) { return null; }
+  }
+  function saveBest(level, ms) {
+    try { localStorage.setItem("williams-abc-best-" + level, String(Math.round(ms))); } catch (e) { /* private mode */ }
+  }
+
   /* ---------------- level flow ---------------- */
   function startLevel(name) {
     ensureAudio();
@@ -904,6 +1079,7 @@
     el.levelOverlay.hidden = true;
     el.winOverlay.hidden = true;
     if (!state.cfg.time) el.timerTrack.classList.remove("on");
+    startRunClock();
     nextRound();
   }
 
@@ -911,8 +1087,21 @@
     state.playing = false;
     clearTimers();
     clearKeyStates();
+    stopRunClock();
+    var elapsed = performance.now() - state.runStart;
+    clockValueEl.textContent = formatTime(elapsed);
+
+    var prevBest = loadBest(state.level);
+    var isNewBest = prevBest === null || elapsed < prevBest;
+    if (isNewBest) saveBest(state.level, elapsed);
+
     playFanfare();
     burstConfetti(160, true);
+    if (isNewBest) {
+      setTimeout(function () { burstConfetti(120, true); }, 600);
+      setTimeout(function () { burstConfetti(120, true); }, 1200);
+    }
+
     var trophies = "";
     for (var i = 0; i < state.stars; i++) trophies += "⭐";
     el.trophyRow.textContent = trophies || "🌟";
@@ -920,8 +1109,21 @@
     el.winSub.textContent = state.cfg.words
       ? "William, you spelled " + state.stars + " whole words — incredible!"
       : "William, you found " + state.stars + " letters — give yourself a big clap!";
+
+    document.getElementById("time-value").textContent = formatTime(elapsed);
+    document.getElementById("time-chip").hidden = false;
+    var bestChip = document.getElementById("best-chip");
+    var bestBanner = document.getElementById("best-banner");
+    bestBanner.hidden = !isNewBest;
+    if (isNewBest) {
+      bestChip.hidden = true;
+      say("Hooray William! A new personal best! " + speakTime(elapsed) + "!");
+    } else {
+      document.getElementById("best-value").textContent = formatTime(prevBest);
+      bestChip.hidden = false;
+      say("Hooray William! You did it! Give yourself a big clap!");
+    }
     el.winOverlay.hidden = false;
-    say("Hooray William! You did it! Give yourself a big clap!");
   }
 
   document.getElementById("level-grid").addEventListener("pointerdown", function (ev) {
@@ -936,15 +1138,20 @@
     el.levelOverlay.hidden = false;
     state.playing = false;
     clearTimers();
+    hideRunClock();
+    updateLevelBests();
   });
   document.getElementById("quit-btn").addEventListener("pointerdown", function () {
     state.playing = false;
     clearTimers();
     clearKeyStates();
+    hideRunClock();
     el.levelOverlay.hidden = false;
+    updateLevelBests();
   });
 
   buildStarMeter(10);
+  updateLevelBests();
 })();
 </script>
 </body>
