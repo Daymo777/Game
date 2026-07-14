@@ -1590,10 +1590,16 @@
   function updateCaseButton() {
     caseBtn.textContent = caseMode === "lower" ? "🔡 Letters: abc" : "🔠 Letters: ABC";
   }
+  function updateKeyboardCase() {
+    Object.keys(keyEls).forEach(function (ch) {
+      keyEls[ch].textContent = dispCase(ch);
+    });
+  }
   caseBtn.addEventListener("click", function () {
     caseMode = caseMode === "lower" ? "upper" : "lower";
     try { localStorage.setItem("williams-abc-case", caseMode); } catch (e) { /* ok */ }
     updateCaseButton();
+    updateKeyboardCase();
     updateLevelBests();
   });
 
@@ -1617,6 +1623,7 @@
   buildStarMeter(10);
   updateLevelBests();
   updateCaseButton();
+  updateKeyboardCase();
   updateStickerButton();
 })();
 </script>

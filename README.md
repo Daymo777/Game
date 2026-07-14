@@ -37,7 +37,7 @@ Every finished level earns one random sticker into William's sticker book — 30
 
 ## Small letters mode 🔡
 
-The **Letters: ABC / abc** toggle on the menu switches every level to lowercase — the screen shows "a" while the keys still show "A", teaching the capital-to-small mapping children need for reading. The choice is remembered between visits.
+The **Letters: ABC / abc** toggle on the menu switches every level to lowercase, including the on-screen keyboard, so tablet play matches the letters in his books. On a physical keyboard the keys still show capitals, which quietly teaches the capital-to-small mapping. The choice is remembered between visits.
 
 ## Grown-ups' corner 🎙️
 
