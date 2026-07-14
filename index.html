@@ -588,7 +588,28 @@
     { word: "HAT", emoji: "🎩" }, { word: "STAR", emoji: "⭐" },
     { word: "FISH", emoji: "🐟" }, { word: "DUCK", emoji: "🦆" },
     { word: "FROG", emoji: "🐸" }, { word: "CAKE", emoji: "🎂" },
-    { word: "MOON", emoji: "🌙" }, { word: "BALL", emoji: "⚽" }
+    { word: "MOON", emoji: "🌙" }, { word: "BALL", emoji: "⚽" },
+    { word: "ANT", emoji: "🐜" }, { word: "BAT", emoji: "🦇" },
+    { word: "BUG", emoji: "🐛" }, { word: "BED", emoji: "🛏️" },
+    { word: "BOX", emoji: "📦" }, { word: "CUP", emoji: "🥤" },
+    { word: "CAP", emoji: "🧢" }, { word: "EYE", emoji: "👁️" },
+    { word: "HEN", emoji: "🐔" }, { word: "KEY", emoji: "🔑" },
+    { word: "MAP", emoji: "🗺️" }, { word: "NUT", emoji: "🥜" },
+    { word: "OWL", emoji: "🦉" }, { word: "PEN", emoji: "🖊️" },
+    { word: "PIE", emoji: "🥧" }, { word: "RAT", emoji: "🐀" },
+    { word: "VAN", emoji: "🚐" }, { word: "WEB", emoji: "🕸️" },
+    { word: "JET", emoji: "✈️" }, { word: "EAR", emoji: "👂" },
+    { word: "BOAT", emoji: "⛵" }, { word: "BEAR", emoji: "🐻" },
+    { word: "BIRD", emoji: "🐦" }, { word: "BELL", emoji: "🔔" },
+    { word: "CORN", emoji: "🌽" }, { word: "CRAB", emoji: "🦀" },
+    { word: "DRUM", emoji: "🥁" }, { word: "GIFT", emoji: "🎁" },
+    { word: "GOAT", emoji: "🐐" }, { word: "KITE", emoji: "🪁" },
+    { word: "KING", emoji: "🤴" }, { word: "LEAF", emoji: "🍃" },
+    { word: "LION", emoji: "🦁" }, { word: "MILK", emoji: "🥛" },
+    { word: "RAIN", emoji: "🌧️" }, { word: "RING", emoji: "💍" },
+    { word: "SEAL", emoji: "🦭" }, { word: "SHOE", emoji: "👟" },
+    { word: "SNOW", emoji: "❄️" }, { word: "SOCK", emoji: "🧦" },
+    { word: "TREE", emoji: "🌳" }, { word: "WORM", emoji: "🪱" }
   ];
 
   var LEVELS = {
@@ -927,7 +948,7 @@
     state.round++;
 
     if (state.cfg.words) {
-      state.currentWord = WORDS[(Math.random() * WORDS.length) | 0];
+      state.currentWord = state.wordBag[(state.round - 1) % state.wordBag.length];
       state.wordIndex = 0;
       state.target = state.currentWord.word[0];
       renderWordPrompt();
@@ -1075,6 +1096,15 @@
     state.stars = 0;
     state.letterIndex = 0;
     state.target = null;
+    if (state.cfg.words) {
+      state.wordBag = WORDS.slice();
+      for (var i = state.wordBag.length - 1; i > 0; i--) {
+        var j = (Math.random() * (i + 1)) | 0;
+        var tmp = state.wordBag[i];
+        state.wordBag[i] = state.wordBag[j];
+        state.wordBag[j] = tmp;
+      }
+    }
     buildStarMeter(state.cfg.rounds);
     el.levelOverlay.hidden = true;
     el.winOverlay.hidden = true;
