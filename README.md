@@ -18,6 +18,10 @@ A big colourful letter appears with an emoji friend ("A is for 🍎 Apple!") and
 | 🚀 Rocket | Random letters | 4 seconds |
 | 🌈 Words | Spell whole words (CAT, SUN, MOON…) letter by letter | 8 seconds per letter |
 | 💛 My Family | Type the names of the people William loves | 12 seconds per letter |
+| 🔷 Shapes | Spell shape names (CIRCLE, STAR, ZIGZAG…) | 10 seconds per letter |
+| 🔢 Numbers | Count the objects, then press the matching number key | 9 seconds |
+
+The Numbers level reveals a real number row above the QWERTY keys — count the emojis (three balloons → press 3), with ten needing 1 then 0 just like a real keyboard.
 
 If the timer runs out, nothing bad happens — the game just points out the key and waits. Ten stars finish a level with a big fanfare.
 

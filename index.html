@@ -191,6 +191,16 @@
     0%, 100% { transform: translateY(0) rotate(-4deg); }
     50% { transform: translateY(-10px) rotate(4deg); }
   }
+  #buddy.counting {
+    font-size: clamp(1.3rem, 4.5vh, 2.4rem);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3px;
+    max-width: clamp(120px, 26vw, 280px);
+    line-height: 1.15;
+    animation: none;
+  }
 
   .prompt-letters {
     display: flex;
@@ -279,8 +289,10 @@
     justify-content: center;
     gap: clamp(4px, .8vw, 8px);
   }
-  .kb-row[data-row="1"] { padding-left: 3%; }
-  .kb-row[data-row="2"] { padding-left: 8%; }
+  .kb-row[data-row="home"] { padding-left: 3%; }
+  .kb-row[data-row="bottom"] { padding-left: 8%; }
+  .kb-row[data-row="num"] { display: none; }
+  #keyboard.with-numbers .kb-row[data-row="num"] { display: flex; }
 
   .key {
     flex: 1 1 0;
@@ -670,6 +682,14 @@
       <span class="icon">💛</span><span class="name">My Family</span>
       <span class="hintline">Type the people you love</span>
     </button>
+    <button class="level-btn" data-level="shapes" style="--lv: #2bb3a3;" type="button">
+      <span class="icon">🔷</span><span class="name">Shapes</span>
+      <span class="hintline">Spell circle, star and heart</span>
+    </button>
+    <button class="level-btn" data-level="numbers" style="--lv: #f59e2d;" type="button">
+      <span class="icon">🔢</span><span class="name">Numbers</span>
+      <span class="hintline">Count and press the number</span>
+    </button>
   </div>
   <div id="menu-extras">
     <button class="chip-btn" id="case-btn" type="button">🔠 Letters: ABC</button>
@@ -802,6 +822,23 @@
     ]}
   ];
 
+  var SHAPES = [
+    { word: "CIRCLE", emoji: "⭕" }, { word: "SQUARE", emoji: "🟦" },
+    { word: "TRIANGLE", emoji: "🔺" }, { word: "STAR", emoji: "⭐" },
+    { word: "HEART", emoji: "💛" }, { word: "DIAMOND", emoji: "🔷" },
+    { word: "OVAL", emoji: "🥚" }, { word: "RECTANGLE", emoji: "🚪" },
+    { word: "CROSS", emoji: "➕" }, { word: "CRESCENT", emoji: "🌙" },
+    { word: "SPIRAL", emoji: "🌀" }, { word: "ZIGZAG", emoji: "⚡" }
+  ];
+
+  var NUMBERS = [
+    { word: "1", label: "one", emoji: "⭐" },  { word: "2", label: "two", emoji: "🍎" },
+    { word: "3", label: "three", emoji: "🎈" },{ word: "4", label: "four", emoji: "🦆" },
+    { word: "5", label: "five", emoji: "🍌" }, { word: "6", label: "six", emoji: "🐞" },
+    { word: "7", label: "seven", emoji: "🌼" },{ word: "8", label: "eight", emoji: "🐟" },
+    { word: "9", label: "nine", emoji: "🍓" }, { word: "10", label: "ten", emoji: "🐝" }
+  ];
+
   var VOICE_SLOTS = [
     { id: "cheer", label: "Correct letter cheer", hint: "e.g. “Yay William!”" },
     { id: "word", label: "Finished a word or name", hint: "e.g. “You spelled it!”" },
@@ -815,10 +852,17 @@
     bunny:  { time: 7000,  hintDelay: 3000, rounds: 10 },
     rocket: { time: 4000,  hintDelay: 2000, rounds: 10 },
     words:  { time: 8000,  hintDelay: 2500, rounds: 6, words: true },
-    family: { time: 12000, hintDelay: 2500, rounds: 6, words: true, family: true }
+    family: { time: 12000, hintDelay: 2500, rounds: 6, words: true, family: true },
+    shapes: { time: 10000, hintDelay: 2500, rounds: 6, words: true, shapes: true },
+    numbers:{ time: 9000,  hintDelay: 2500, rounds: 10, words: true, numbers: true }
   };
 
-  var KEY_ROWS = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+  var KEY_ROWS = [
+    { id: "num", chars: "1234567890" },
+    { id: "top", chars: "QWERTYUIOP" },
+    { id: "home", chars: "ASDFGHJKL" },
+    { id: "bottom", chars: "ZXCVBNM" }
+  ];
   var KEY_COLORS = ["#ff6b6b", "#f59e2d", "#5bc479", "#3e8ef0", "#9b5de5", "#e3589b"];
   var CHEERS = ["Yay!", "Super!", "Wow!", "You did it!", "Great job!", "Amazing!", "High five! ✋"];
   var LETTER_COLORS = ["#ff6b6b", "#3e8ef0", "#5bc479", "#9b5de5", "#f59e2d", "#e3589b"];
@@ -987,8 +1031,8 @@
   KEY_ROWS.forEach(function (row, r) {
     var rowEl = document.createElement("div");
     rowEl.className = "kb-row";
-    rowEl.dataset.row = r;
-    row.split("").forEach(function (ch, i) {
+    rowEl.dataset.row = row.id;
+    row.chars.split("").forEach(function (ch, i) {
       var b = document.createElement("button");
       b.type = "button";
       b.className = "key";
@@ -1139,7 +1183,13 @@
     var entry = state.currentWord;
     var display = displayWordFor(entry);
     var fontSize = display.length > 6 ? "min(15vh, " + (60 / display.length).toFixed(1) + "vw)" : "";
-    el.buddy.textContent = entry.emoji;
+    if (state.cfg.numbers) {
+      el.buddy.classList.add("counting");
+      el.buddy.textContent = new Array(parseInt(entry.word, 10) + 1).join(entry.emoji);
+    } else {
+      el.buddy.classList.remove("counting");
+      el.buddy.textContent = entry.emoji;
+    }
     el.prompt.innerHTML = "";
     var typed = 0;
     display.split("").forEach(function (ch, i) {
@@ -1158,9 +1208,13 @@
       el.prompt.appendChild(span);
       typed++;
     });
-    var name = state.cfg.family ? entry.label : dispCase(entry.word);
     var targetCh = dispCase(state.typeSeq[state.wordIndex]);
-    el.caption.textContent = (state.cfg.family ? "Type " : "Spell ") + name + " — find the letter " + targetCh + "!";
+    if (state.cfg.numbers) {
+      el.caption.textContent = "Count the " + entry.emoji + " — find the number " + targetCh + "!";
+    } else {
+      var name = state.cfg.family ? entry.label : dispCase(entry.word);
+      el.caption.textContent = (state.cfg.family ? "Type " : "Spell ") + name + " — find the letter " + targetCh + "!";
+    }
   }
 
   function nextRound() {
@@ -1175,7 +1229,8 @@
       state.typeSeq = state.currentWord.word.replace(/ /g, "");
       state.target = state.typeSeq[0];
       renderWordPrompt();
-      if (state.cfg.family) say("Can you type " + state.currentWord.label + "?");
+      if (state.cfg.numbers) say(state.currentWord.label + "! Can you count and find the number " + state.currentWord.label + "?");
+      else if (state.cfg.family) say("Can you type " + state.currentWord.label + "?");
       else say("Can you spell " + state.currentWord.word.toLowerCase() + "?");
     } else {
       var letter = pickLetter();
@@ -1192,10 +1247,14 @@
     state.wordIndex++;
     if (state.wordIndex >= state.typeSeq.length) {
       // word complete!
-      var doneName = state.cfg.family ? state.currentWord.label : state.currentWord.word;
-      el.caption.textContent = doneName + "! " + state.currentWord.emoji + " You " + (state.cfg.family ? "typed" : "spelled") + " it!";
+      var doneName = state.cfg.family || state.cfg.numbers ? state.currentWord.label : state.currentWord.word;
+      el.caption.textContent = state.cfg.numbers
+        ? doneName.charAt(0).toUpperCase() + doneName.slice(1) + " " + state.currentWord.emoji + "! You found it!"
+        : doneName + "! " + state.currentWord.emoji + " You " + (state.cfg.family ? "typed" : "spelled") + " it!";
       if (!playVoice("word")) {
-        say(state.cfg.family
+        say(state.cfg.numbers
+          ? "Yes! " + doneName + "! Well counted!"
+          : state.cfg.family
           ? doneName + "! You typed it! Hooray!"
           : state.currentWord.word.toLowerCase() + "! You spelled it!");
       }
@@ -1249,7 +1308,7 @@
   window.addEventListener("keydown", function (ev) {
     if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
     var ch = ev.key && ev.key.length === 1 ? ev.key.toUpperCase() : "";
-    if (ch < "A" || ch > "Z") return;
+    if (!/^[A-Z0-9]$/.test(ch)) return;
     ev.preventDefault();
     var keyEl = keyEls[ch];
     if (keyEl) {
@@ -1329,8 +1388,9 @@
     state.stars = 0;
     state.letterIndex = 0;
     state.target = null;
+    el.keyboard.classList.toggle("with-numbers", !!state.cfg.numbers);
     if (state.cfg.words) {
-      state.wordBag = (state.cfg.family ? FAMILY : WORDS).slice();
+      state.wordBag = (state.cfg.family ? FAMILY : state.cfg.shapes ? SHAPES : state.cfg.numbers ? NUMBERS : WORDS).slice();
       for (var i = state.wordBag.length - 1; i > 0; i--) {
         var j = (Math.random() * (i + 1)) | 0;
         var tmp = state.wordBag[i];
@@ -1368,9 +1428,16 @@
     var trophies = "";
     for (var i = 0; i < state.stars; i++) trophies += "⭐";
     el.trophyRow.textContent = trophies || "🌟";
-    el.winHeadline.textContent = state.cfg.family ? "Family Star!" : state.cfg.words ? "Word Wizard!" : "Alphabet Star!";
+    el.winHeadline.textContent = state.cfg.family ? "Family Star!"
+      : state.cfg.shapes ? "Shape Star!"
+      : state.cfg.numbers ? "Counting Champion!"
+      : state.cfg.words ? "Word Wizard!" : "Alphabet Star!";
     el.winSub.textContent = state.cfg.family
       ? "William, you typed " + state.stars + " people you love!"
+      : state.cfg.shapes
+      ? "William, you spelled " + state.stars + " shapes — brilliant!"
+      : state.cfg.numbers
+      ? "William, you counted all the way to ten!"
       : state.cfg.words
       ? "William, you spelled " + state.stars + " whole words — incredible!"
       : "William, you found " + state.stars + " letters — give yourself a big clap!";
