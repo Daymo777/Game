@@ -4,6 +4,8 @@ A bright preschool typing game that teaches the QWERTY keyboard, made for a 3-ye
 
 **To play:** just open `index.html` in any browser — no install, no internet needed. Works with a real keyboard, or by tapping the big on-screen keys on a tablet.
 
+> This folder holds two games: the alphabet game in `index.html`, and **[🍉 Fruit Run](#-fruit-run)** in `fruit-game.html` — a platform dash for bigger kids, documented at the bottom of this file.
+
 ## How it works
 
 A big colourful letter appears with an emoji friend ("A is for 🍎 Apple!") and the game says it out loud. William finds that letter on the keyboard and presses it — stars, confetti and cheers follow. There are no wrong answers: a missed key just wiggles, and the correct key starts bouncing in yellow as a hint.
@@ -54,3 +56,61 @@ To edit the family name list, change the `FAMILY` array near the top of the scri
 - Sound uses the browser's built-in voice (speech synthesis) and gentle chimes — no external assets, everything is in the single `index.html` file.
 - Tested on desktop Chrome; touch input works for tablets.
 - Motion is reduced automatically if the device has "reduce motion" switched on.
+
+---
+
+# 🍉 Fruit Run
+
+A second, separate game lives in this folder: **`fruit-game.html`**. Open it in any browser — again no install, no internet, everything in the one file. It's aimed at older players than the alphabet game.
+
+**The aim:** you start as a tiny blueberry on a very long platform. Reach the finish line 2,200 m away — and get there as the biggest fruit you can.
+
+## How it works
+
+You run forwards on your own; all you do is steer, jump and choose.
+
+- **Match to grow.** Fruits lying on the platform that are *the same as you* glow with a yellow ring. Collect enough of them (2–6, more as you get bigger) and you ripen into the next fruit up. Wrong-sized fruits give a few points and a "too big!" / "too small!" — they don't count towards ripening.
+- **Stay on the platform.** The deck narrows, and holes open up down the middle or along one edge. Roll off and the run is over.
+- **Dodge the kitchen.** 🔪 knives (some sweep side to side), 🍴 forks, 🌀 blenders and chopping 🪓 cleavers knock you down a size. 🥖 rolling pins and 🧊 ice cubes are low enough to jump. 🍌 banana peels don't hurt, they just take your steering away for a moment.
+- **Pick your gate.** Gates come in pairs across the platform and you must go through one of them. Green is kind, red is not.
+
+| Gate | Effect |
+|------|--------|
+| ⬆️ RIPEN +1 / ⏫ RIPEN +2 | Grow a size (or two) on the spot |
+| ✨ ×2 MATCH | Every matched fruit counts double for 14 s |
+| 🛡️ SHIELD | Absorbs the next hit |
+| 🧲 MAGNET | Matching fruits drift towards you |
+| 🐌 SLOW-MO | Slows the run down for 7 s |
+| ⭐ +500 | Straight points |
+| 🔪 SLICED / 🪰 ROTTEN / 🥤 SQUEEZE | Down a size |
+| ⚡ RUSH | Everything speeds up for 8 s |
+
+### The fruit ladder
+
+🫐 → 🍒 → 🍓 → 🍇 → 🥝 → 🍋 → 🍊 → 🍎 → 🍍 → 🍈 → 🍉
+
+Getting knocked down a size is the usual cost of a hit, so being big is also your health bar. As the smallest fruit you get one bruise 🤕 for free — the next hit ends the run, until you ripen again.
+
+### The three stretches
+
+| Stretch | Feel |
+|---------|------|
+| 🌳 Orchard Walk | Gentle: wide deck, plenty of fruit, time to grow |
+| 🔪 Kitchen Counter | Narrower, with knives, cleavers and blenders |
+| 🏭 Juice Factory | Fast and mean — and the finish line |
+
+## Controls
+
+| | Keyboard | Touch |
+|---|---|---|
+| Steer | ← → or A / D | ◀ ▶ buttons, or drag anywhere |
+| Jump | Space (or ↑ / W) | ⤴ button, or tap the screen |
+| Pause | P or Esc | — |
+| Start / restart | Enter or Space | the big button |
+
+## Notes for grown-ups
+
+- Your best score is saved on the device (localStorage) and shown on the title screen.
+- The track is generated fresh every run, so no two runs are the same.
+- Sound is a handful of WebAudio blips — no external assets. Screen shake and particles switch off if the device has "reduce motion" set.
+- All the tuning lives in plain constants near the top of the script in `fruit-game.html`: `TRACK_LEN`, `BASE_SPEED` / `MAX_SPEED`, the `TIERS` ladder, `OBSTACLES` and `GATES`.
